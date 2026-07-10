@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#3BA99C">
+<title>🧩 Terapi Oyunları</title>
+<style>
+  :root {
+    --bg:#F3F8F6; --surface:#FFFFFF; --ink:#2E4057; --soft:#6B7F8E;
+    --teal:#3BA99C; --lilac:#8E7CC3; --line:#DFEAE6;
+  }
+  * { box-sizing:border-box; margin:0; -webkit-tap-highlight-color:transparent; }
+  body { min-height:100vh; background:var(--bg); color:var(--ink);
+         font-family:'Segoe UI', system-ui, -apple-system, sans-serif; font-weight:600;
+         display:flex; flex-direction:column; align-items:center; justify-content:center;
+         padding:24px; gap:10px; }
+  h1 { font-family:'Comic Sans MS','Segoe UI', sans-serif; font-size:34px; color:var(--ink); text-align:center; }
+  .alt { color:var(--soft); font-size:16px; margin-bottom:26px; text-align:center; }
+  .kartlar { display:flex; gap:22px; flex-wrap:wrap; justify-content:center; }
+  a.uygKart { text-decoration:none; color:var(--ink); background:var(--surface);
+              border:3px solid var(--line); border-bottom-width:8px; border-radius:28px;
+              width:270px; padding:30px 22px; text-align:center;
+              transition:transform .15s; display:block; }
+  a.uygKart:active { transform:scale(.96); }
+  a.uygKart:hover { transform:translateY(-4px); }
+  .ikon { font-size:76px; }
+  .ad { font-family:'Comic Sans MS','Segoe UI', sans-serif; font-size:26px; font-weight:800; margin:10px 0 6px; }
+  .tanim { font-size:14px; color:var(--soft); line-height:1.5; }
+  .etiket { display:inline-block; margin-top:12px; font-size:13px; font-weight:800;
+            color:#fff; border-radius:12px; padding:5px 14px; }
+  .bahce { border-bottom-color:var(--teal); }
+  .bahce .etiket { background:var(--teal); }
+  .kutular { border-bottom-color:var(--lilac); }
+  .kutular .etiket { background:var(--lilac); }
+</style>
+</head>
+<body>
+  <h1>🧩 Terapi Oyunları</h1>
+  <p class="alt">Seansta kullanmak için bir oyun seç</p>
+  <div class="kartlar">
+    <a class="uygKart bahce" href="ses-bahcesi.html">
+      <div class="ikon">🌱</div>
+      <div class="ad">Ses Bahçesi</div>
+      <div class="tanim">Çocuğun sesi oyunu yönetir: vokalizasyon, fonasyon süresi, ses şiddeti, hece ve perde çalışmaları</div>
+      <span class="etiket">🎤 Mikrofonlu</span>
+    </a>
+    <a class="uygKart kutular" href="karsit-kutular.html">
+      <div class="ikon">🎭</div>
+      <div class="ad">Karşıt Kutular</div>
+      <div class="tanim">Türkçe minimal çiftlerle fonolojik terapi: dinle-bul ve söyle-aç fazları, doz sayacı, seans raporu</div>
+      <span class="etiket">👂 Dinleme + 🗣️ Üretim</span>
+    </a>
+  </div>
+</body>
+</html>

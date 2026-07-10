@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#8E7CC3">
+<title>🎭 Karşıt Kutular — Türkçe Minimal Çiftler Terapi Oyunu</title>
+<style>
+  :root {
+    --bg:#F6F4FA; --surface:#FFFFFF; --ink:#2E4057; --soft:#6B7F8E;
+    --teal:#3BA99C; --amber:#FFB84D; --coral:#F76C5E;
+    --lilac:#8E7CC3; --lilacDark:#6F5DA8; --sky:#5FA8D3; --line:#E4DFF0;
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; }
+  body { min-height:100vh; background:var(--bg); color:var(--ink);
+         font-family:'Segoe UI', system-ui, -apple-system, sans-serif; font-weight:600; }
+  h1,h2,.baslikFont { font-family:'Comic Sans MS','Segoe UI', system-ui, sans-serif; }
+  button { font-family:inherit; cursor:pointer; }
+
+  header { display:flex; align-items:center; justify-content:space-between;
+           padding:14px 18px; background:var(--surface); border-bottom:3px solid var(--line); }
+  .logo { font-weight:800; font-size:22px; color:var(--lilacDark); }
+
+  main { max-width:760px; margin:0 auto; padding:22px 16px 60px; }
+
+  .buyukBtn { border:none; border-radius:20px; font-weight:800;
+              box-shadow:0 4px 0 rgba(0,0,0,.12); transition:transform .1s; }
+  .buyukBtn:active { transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.12); }
+  .kucukBtn { border:2px solid var(--line); background:var(--surface); border-radius:14px;
+              padding:8px 14px; font-weight:800; font-size:15px; color:var(--ink); }
+  .gizli { display:none !important; }
+  .ortala { text-align:center; }
+  .aciklama { color:var(--soft); font-size:15px; font-weight:700; margin:0 0 14px; text-align:center; }
+
+  /* süreç kartları */
+  .surecGrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(210px,1fr)); gap:14px; }
+  .surecKart { background:var(--surface); border:3px solid var(--line); border-bottom-width:6px;
+               border-radius:20px; padding:16px 12px; display:flex; flex-direction:column;
+               align-items:center; gap:6px; transition:transform .15s; }
+  .surecKart:active { transform:scale(.97); }
+  .surecOrnek { font-size:13px; color:var(--soft); font-weight:700; }
+
+  /* ayar paneli */
+  #ayarPanel { background:#F3EFFA; border-bottom:3px solid var(--lilac); padding:14px 18px;
+               display:none; gap:20px; flex-wrap:wrap; align-items:center; font-size:14px; font-weight:700; }
+  #ayarPanel.acik { display:flex; }
+  #ayarPanel select, #ayarPanel input[type=range] { font-family:inherit; font-weight:700; }
+  #ayarPanel select { border:2px solid var(--line); border-radius:12px; padding:6px 8px; max-width:190px; }
+
+  /* doz çubuğu */
+  #dozKap { max-width:560px; margin:0 auto 14px; }
+  #dozBar { position:relative; height:20px; background:#E9E4F4; border-radius:12px; overflow:hidden; }
+  #dozDolu { height:100%; width:0%; background:linear-gradient(90deg, var(--lilac), var(--teal));
+             border-radius:12px; transition:width .3s; }
+  #dozYazi { text-align:center; font-size:14px; font-weight:800; color:var(--soft); margin-top:4px; }
+
+  /* faz sekmeleri */
+  .fazlar { display:flex; gap:8px; justify-content:center; margin-bottom:16px; }
+  .fazBtn { border:none; border-radius:16px; padding:12px 22px; font-weight:800; font-size:17px;
+            background:var(--surface); color:var(--soft); border:3px solid var(--line); }
+  .fazBtn.aktif { background:var(--lilac); color:#fff; border-color:var(--lilac); }
+
+  /* algı fazı kartları */
+  #algiAlan { display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
+  .resimKart { background:var(--surface); border:4px solid var(--line); border-radius:24px;
+               padding:20px 16px; width:170px; display:flex; flex-direction:column; align-items:center;
+               gap:8px; transition:transform .15s, border-color .2s, background .2s; }
+  .resimKart:active { transform:scale(.96); }
+  .resimKart .emoji { font-size:74px; line-height:1.1; }
+  .resimKart .kelime { font-size:24px; font-weight:800; }
+  .resimKart.dogru { border-color:var(--teal); background:#E7F7EF; }
+  .resimKart.yanlis { animation:salla .4s; border-color:var(--coral); }
+  @keyframes salla { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+  /* üretim fazı */
+  #hedefKart { background:var(--surface); border:4px solid var(--amber); border-radius:26px;
+               max-width:300px; margin:0 auto 16px; padding:22px; }
+  #hedefKart .emoji { font-size:96px; }
+  #hedefKart .kelime { font-size:34px; font-weight:800; margin-top:4px; }
+  #kapi { position:relative; width:150px; height:170px; margin:0 auto 14px; perspective:600px; }
+  #kapiGovde { position:absolute; inset:0; background:linear-gradient(#B08968,#8B5E3C);
+               border-radius:14px 14px 4px 4px; display:flex; align-items:center; justify-content:center;
+               font-size:30px; transform-origin:left; transition:transform .5s; z-index:2; }
+  #kapi.acikK #kapiGovde { transform:rotateY(-105deg); }
+  #kapiIci { position:absolute; inset:0; background:#F3EFFA; border:3px solid var(--line);
+             border-radius:14px 14px 4px 4px; display:flex; align-items:center; justify-content:center;
+             font-size:76px; }
+  #terapistSecim { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .secimBtn { border:3px solid var(--line); background:var(--surface); border-radius:16px;
+              padding:10px 16px; font-weight:800; font-size:19px; display:flex; align-items:center; gap:8px; }
+  .secimBtn:active { transform:scale(.95); }
+
+  #geriBildirim { min-height:44px; font-size:21px; font-weight:800; margin-top:12px; }
+
+  /* rapor */
+  .raporKutu { background:var(--surface); border:3px solid var(--line); border-radius:20px;
+               padding:18px; margin:12px auto; max-width:520px; text-align:left; }
+  .raporSatir { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed var(--line); }
+
+  .konfetiParca { position:absolute; top:-24px; animation:konfeti 2.5s ease-in forwards; }
+  @keyframes konfeti { to { transform:translateY(105vh) rotate(540deg); } }
+  @keyframes parla { from{transform:scale(1)} to{transform:scale(1.15)} }
+  .parla { animation:parla .8s infinite alternate; }
+  @media (prefers-reduced-motion:reduce){ *{animation:none !important;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🎭 Karşıt Kutular</div>
+  <div>
+    <a class="kucukBtn" href="index.html" style="text-decoration:none" title="Oyun seçimine dön">🧩</a>
+    <button class="kucukBtn" onclick="tamEkran()" title="Tam ekran">⛶</button>
+    <button class="kucukBtn" onclick="ayarToggle()">⚙️</button>
+    <button id="raporBtn" class="kucukBtn gizli" onclick="git('rapor')">📊</button>
+    <button id="anaBtn" class="kucukBtn gizli" onclick="git('kurulum')">🏠</button>
+  </div>
+</header>
+
+<div id="ayarPanel">
+  <label>🗣 Ses: <select id="sesSecici"></select></label>
+  <label>🎯 Hedef doz: <span id="dozTxt">50</span> deneme
+    <input type="range" id="ayarDoz" min="20" max="100" step="10" value="50"></label>
+  <label><input type="checkbox" id="ayarOto" checked> Kelimeyi otomatik söyle</label>
+</div>
+
+<main>
+
+  <!-- KURULUM -->
+  <section id="ekran-kurulum">
+    <p class="aciklama">Çocuğun fonolojik sürecini seç — o sürece ait Türkçe karşıt çiftler yüklensin:</p>
+    <div class="surecGrid" id="surecListe"></div>
+  </section>
+
+  <!-- OYUN -->
+  <section id="ekran-oyun" class="gizli">
+    <div id="dozKap">
+      <div id="dozBar"><div id="dozDolu"></div></div>
+      <div id="dozYazi">0 / 50 deneme</div>
+    </div>
+
+    <div class="fazlar">
+      <button id="fazAlgi" class="fazBtn aktif" onclick="fazDegis('algi')">👂 Dinle & Bul</button>
+      <button id="fazUretim" class="fazBtn" onclick="fazDegis('uretim')">🗣️ Söyle & Aç</button>
+    </div>
+
+    <!-- ALGI FAZI -->
+    <div id="algiFaz">
+      <p class="aciklama">Söylenen kelimenin resmine dokun! <button class="kucukBtn" onclick="hedefiSoyle()">🔉 Tekrar dinle</button></p>
+      <div id="algiAlan"></div>
+    </div>
+
+    <!-- ÜRETİM FAZI -->
+    <div id="uretimFaz" class="gizli">
+      <p class="aciklama">Çocuk bu kelimeyi söylesin — sen çocuğun <b>gerçekte söylediğine</b> dokun:</p>
+      <div id="hedefKart" class="ortala">
+        <div class="emoji" id="hedefEmoji">🐦</div>
+        <div class="kelime baslikFont" id="hedefKelime">kuş</div>
+      </div>
+      <div id="kapi">
+        <div id="kapiIci">❔</div>
+        <div id="kapiGovde">🚪</div>
+      </div>
+      <div id="terapistSecim"></div>
+    </div>
+
+    <div id="geriBildirim" class="ortala"></div>
+  </section>
+
+  <!-- RAPOR -->
+  <section id="ekran-rapor" class="gizli ortala">
+    <h2 class="baslikFont" style="font-size:26px; margin-bottom:6px">📊 Seans Raporu</h2>
+    <p class="aciklama" id="raporSurec"></p>
+    <div class="raporKutu">
+      <div class="raporSatir"><span>Toplam deneme</span><b id="rToplam">0</b></div>
+      <div class="raporSatir"><span>👂 Algı doğruluğu</span><b id="rAlgi">—</b></div>
+      <div class="raporSatir"><span>🗣️ Üretim doğruluğu</span><b id="rUretim">—</b></div>
+    </div>
+    <div class="raporKutu">
+      <b>Üretimde karışan çiftler:</b>
+      <div id="rHatalar" style="margin-top:8px; color:var(--soft)">Henüz hata yok 🎉</div>
+    </div>
+    <button class="buyukBtn" style="background:var(--lilac); color:#fff; padding:14px 32px; font-size:19px" onclick="git('oyun')">▶ Devam et</button>
+    <button class="kucukBtn" style="margin-left:8px" onclick="sifirla()">↺ Yeni seans</button>
+  </section>
+
+</main>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+
+/* ================= TÜRKÇE KARŞIT ÇİFT HAVUZU ================= */
+/* Her madde: [kelime, emoji]. Setler 2'li (minimal/maksimal) veya 3+'lı (çoklu karşıtlık). */
+const SURECLER = [
+  { id:"k-t", ad:"Öne alma (k→t)", e:"🐦→⌨️", ornek:"kuş–tuş, kek–tek",
+    setler:[ [["kuş","🐦"],["tuş","⌨️"]], [["kek","🍰"],["tek","1️⃣"]],
+             [["kel","👨‍🦲"],["tel","🧵"]], [["kaş","🤨"],["taş","🪨"]] ] },
+  { id:"s-t", ad:"Durak sesleştirme (s→t, f→p)", e:"🌊→🧵", ornek:"sel–tel, fil–pil",
+    setler:[ [["saç","💇"],["taç","👑"]], [["sel","🌊"],["tel","🧵"]],
+             [["sur","🏰"],["tur","🚌"]], [["fil","🐘"],["pil","🔋"]] ] },
+  { id:"s-s", ad:"Sızıcı hataları (ş→s)", e:"🧣→🛶", ornek:"şal–sal, taş–tas",
+    setler:[ [["şal","🧣"],["sal","🛶"]], [["taş","🪨"],["tas","🥣"]],
+             [["kaş","🤨"],["kas","💪"]] ] },
+  { id:"r-y", ad:"R hataları (r→y)", e:"🎭→🛣️", ornek:"rol–yol, ray–yay",
+    setler:[ [["rol","🎭"],["yol","🛣️"]], [["ray","🛤️"],["yay","🏹"]] ] },
+  { id:"kume", ad:"Küme indirgeme (rt→t, lp→p)", e:"💳→🏢", ornek:"kart–kat, kalp–kap",
+    setler:[ [["kart","💳"],["kat","🏢"]], [["kalp","❤️"],["kap","🫙"]] ] },
+  { id:"maks", ad:"Maksimal karşıtlık", e:"🟣→🔥", ornek:"mor–kor, yol–kol",
+    setler:[ [["mor","🟣"],["kor","🔥"]], [["yol","🛣️"],["kol","🦾"]],
+             [["bal","🍯"],["şal","🧣"]], [["maç","⚽"],["taç","👑"]] ] },
+  { id:"coklu", ad:"Çoklu karşıtlık (3+ resim)", e:"🪨🤨👤", ornek:"taş–kaş–baş, çay–tay–ay",
+    setler:[ [["taş","🪨"],["kaş","🤨"],["baş","👤"],["aş","🍲"]],
+             [["tel","🧵"],["sel","🌊"],["kel","👨‍🦲"],["yel","💨"]],
+             [["çay","🍵"],["tay","🐴"],["bay","🤵"],["yay","🏹"],["ay","🌙"]] ] },
+];
+
+/* ================= TÜRKÇE SES YÖNETİMİ ================= */
+let secilenSes = null;
+function trSesler(){
+  if(!window.speechSynthesis) return [];
+  return speechSynthesis.getVoices().filter(v=>v.lang && v.lang.toLowerCase().replace("_","-").startsWith("tr"));
+}
+function enIyiSes(vs){
+  if(!vs.length) return null;
+  const puan = v => {
+    const n=v.name.toLowerCase(); let s=0;
+    if(n.includes("natural")) s+=6;
+    if(n.includes("emel")||n.includes("ahmet")||n.includes("tolga")) s+=5;
+    if(n.includes("google")) s+=4;
+    if(n.includes("yelda")) s+=3;
+    if(v.localService===false) s+=1;
+    return s;
+  };
+  return [...vs].sort((a,b)=>puan(b)-puan(a))[0];
+}
+function sesleriYukle(){
+  const vs=trSesler(), sel=$("sesSecici");
+  sel.innerHTML="";
+  if(!vs.length){ sel.innerHTML="<option>Türkçe ses yok</option>"; return; }
+  if(!secilenSes || !vs.some(v=>v.name===secilenSes.name)) secilenSes=enIyiSes(vs);
+  vs.forEach(v=>{
+    const o=document.createElement("option");
+    o.value=v.name; o.textContent="🗣 "+v.name.replace(/Microsoft |Google |Türkçe |\(.*?\)/g,"").trim();
+    if(secilenSes && v.name===secilenSes.name) o.selected=true;
+    sel.appendChild(o);
+  });
+}
+if(window.speechSynthesis){
+  speechSynthesis.addEventListener("voiceschanged", sesleriYukle);
+  setTimeout(sesleriYukle, 400);
+}
+$("sesSecici").onchange = e => {
+  const v=trSesler().find(x=>x.name===e.target.value);
+  if(v){ secilenSes=v; soyle("Merhaba!"); }
+};
+function soyle(t){
+  if(!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang="tr-TR"; u.rate=0.85;
+  if(!secilenSes) secilenSes=enIyiSes(trSesler());
+  if(secilenSes) u.voice=secilenSes;
+  speechSynthesis.speak(u);
+}
+
+/* ================= DURUM ================= */
+let surec=null, faz="algi", tur=null, kilit=false;
+const sayac={ toplam:0, algiD:0, algiT:0, urD:0, urT:0, hatalar:{} };
+const ayarlar={ doz:50, oto:true };
+
+$("ayarDoz").oninput=e=>{ ayarlar.doz=+e.target.value; $("dozTxt").textContent=ayarlar.doz; dozGuncelle(); };
+$("ayarOto").onchange=e=>ayarlar.oto=e.target.checked;
+function ayarToggle(){ $("ayarPanel").classList.toggle("acik"); }
+function tamEkran(){
+  if(!document.fullscreenElement)(document.documentElement.requestFullscreen||function(){}).call(document.documentElement);
+  else (document.exitFullscreen||function(){}).call(document);
+}
+
+/* ================= EKRANLAR ================= */
+function git(e){
+  ["kurulum","oyun","rapor"].forEach(x=>$("ekran-"+x).classList.toggle("gizli",x!==e));
+  $("raporBtn").classList.toggle("gizli", e==="kurulum");
+  $("anaBtn").classList.toggle("gizli", e==="kurulum");
+  if(e==="rapor") raporGuncelle();
+  if(e==="oyun" && !tur) yeniTur();
+}
+function sifirla(){
+  Object.assign(sayac,{toplam:0,algiD:0,algiT:0,urD:0,urT:0,hatalar:{}});
+  surec=null; tur=null; git("kurulum"); dozGuncelle();
+}
+
+/* süreç kartlarını çiz */
+(function(){
+  const kap=$("surecListe");
+  SURECLER.forEach(s=>{
+    const b=document.createElement("button");
+    b.className="surecKart";
+    b.innerHTML='<span style="font-size:40px">'+s.e+'</span>'+
+      '<span class="baslikFont" style="font-weight:800; font-size:17px">'+s.ad+'</span>'+
+      '<span class="surecOrnek">'+s.ornek+'</span>';
+    b.onclick=()=>{ surec=s; $("raporSurec").textContent=s.ad; git("oyun"); yeniTur(); };
+    kap.appendChild(b);
+  });
+})();
+
+/* ================= TUR MANTIĞI ================= */
+function yeniTur(){
+  if(!surec) return;
+  kilit=false;
+  $("geriBildirim").textContent="";
+  const set=surec.setler[Math.floor(Math.random()*surec.setler.length)];
+  const hedefIdx=Math.floor(Math.random()*set.length);
+  tur={ set, hedefIdx };
+  if(faz==="algi") algiCiz(); else uretimCiz();
+}
+
+function fazDegis(f){
+  faz=f;
+  $("fazAlgi").classList.toggle("aktif",f==="algi");
+  $("fazUretim").classList.toggle("aktif",f==="uretim");
+  $("algiFaz").classList.toggle("gizli",f!=="algi");
+  $("uretimFaz").classList.toggle("gizli",f!=="uretim");
+  yeniTur();
+}
+
+/* ---- ALGI FAZI ---- */
+function algiCiz(){
+  const kap=$("algiAlan");
+  kap.innerHTML="";
+  /* kart sırasını karıştır */
+  const sirali=tur.set.map((m,i)=>({m,i})).sort(()=>Math.random()-0.5);
+  sirali.forEach(({m,i})=>{
+    const b=document.createElement("button");
+    b.className="resimKart";
+    b.innerHTML='<span class="emoji">'+m[1]+'</span><span class="kelime baslikFont">'+m[0]+'</span>';
+    b.onclick=()=>algiCevap(i,b);
+    kap.appendChild(b);
+  });
+  if(ayarlar.oto) setTimeout(hedefiSoyle, 450);
+}
+function hedefiSoyle(){ if(tur) soyle(tur.set[tur.hedefIdx][0]); }
+function algiCevap(i,el){
+  if(kilit) return;
+  kilit=true;
+  sayac.toplam++; sayac.algiT++;
+  const dogru = i===tur.hedefIdx;
+  if(dogru){
+    sayac.algiD++;
+    el.classList.add("dogru");
+    $("geriBildirim").textContent="✅ Doğru! "+tur.set[i][0]+" "+tur.set[i][1];
+  }else{
+    el.classList.add("yanlis");
+    /* doğruyu göster */
+    [...$("algiAlan").children].forEach(k=>{
+      if(k.querySelector(".kelime").textContent===tur.set[tur.hedefIdx][0]) k.classList.add("dogru");
+    });
+    $("geriBildirim").textContent="Bu \""+tur.set[i][0]+"\" idi — söylenen: \""+tur.set[tur.hedefIdx][0]+"\"";
+    soyle(tur.set[tur.hedefIdx][0]);
+  }
+  dozGuncelle();
+  setTimeout(yeniTur, dogru?1000:1800);
+}
+
+/* ---- ÜRETİM FAZI ---- */
+function uretimCiz(){
+  const h=tur.set[tur.hedefIdx];
+  $("hedefEmoji").textContent=h[1];
+  $("hedefKelime").textContent=h[0];
+  $("kapi").classList.remove("acikK");
+  $("kapiIci").textContent="❔";
+  const kap=$("terapistSecim");
+  kap.innerHTML="";
+  tur.set.forEach((m,i)=>{
+    const b=document.createElement("button");
+    b.className="secimBtn";
+    b.innerHTML=m[1]+" "+m[0];
+    b.onclick=()=>uretimCevap(i);
+    kap.appendChild(b);
+  });
+  const belirsiz=document.createElement("button");
+  belirsiz.className="secimBtn";
+  belirsiz.style.color="var(--soft)";
+  belirsiz.textContent="❓ anlaşılmadı";
+  belirsiz.onclick=()=>uretimCevap(-1);
+  kap.appendChild(belirsiz);
+}
+function uretimCevap(i){
+  if(kilit) return;
+  kilit=true;
+  sayac.toplam++; sayac.urT++;
+  const hedef=tur.set[tur.hedefIdx];
+  const kapi=$("kapi"), ici=$("kapiIci");
+  if(i===-1){
+    ici.textContent="❔";
+    kapi.classList.add("acikK");
+    $("geriBildirim").textContent="Anlaşılmadı — kapı boş açıldı, tekrar deneyelim";
+    hataEkle(hedef[0],"(anlaşılmadı)");
+  }else{
+    const soylenen=tur.set[i];
+    ici.textContent=soylenen[1];
+    kapi.classList.add("acikK");
+    soyle(soylenen[0]);
+    if(i===tur.hedefIdx){
+      sayac.urD++;
+      $("geriBildirim").textContent="🎉 Kapıdan "+soylenen[0]+" çıktı — tam istediğin!";
+    }else{
+      $("geriBildirim").textContent="😮 Kapıdan "+soylenen[0]+" "+soylenen[1]+" çıktı! Sen "+hedef[0]+" "+hedef[1]+" istemiştin.";
+      hataEkle(hedef[0], soylenen[0]);
+    }
+  }
+  dozGuncelle();
+  setTimeout(yeniTur, 2100);
+}
+function hataEkle(hedef, soylenen){
+  const k=hedef+" → "+soylenen;
+  sayac.hatalar[k]=(sayac.hatalar[k]||0)+1;
+}
+
+/* ---- DOZ & RAPOR ---- */
+let kutlandi=false;
+function dozGuncelle(){
+  const pct=Math.min(100,(sayac.toplam/ayarlar.doz)*100);
+  $("dozDolu").style.width=pct+"%";
+  $("dozYazi").textContent=sayac.toplam+" / "+ayarlar.doz+" deneme";
+  if(sayac.toplam>=ayarlar.doz && !kutlandi){
+    kutlandi=true;
+    konfeti();
+    setTimeout(()=>git("rapor"), 1500);
+  }
+}
+function raporGuncelle(){
+  $("rToplam").textContent=sayac.toplam;
+  $("rAlgi").textContent=sayac.algiT? sayac.algiD+" / "+sayac.algiT+"  (%"+Math.round(100*sayac.algiD/sayac.algiT)+")":"—";
+  $("rUretim").textContent=sayac.urT? sayac.urD+" / "+sayac.urT+"  (%"+Math.round(100*sayac.urD/sayac.urT)+")":"—";
+  const h=$("rHatalar");
+  const girisler=Object.entries(sayac.hatalar).sort((a,b)=>b[1]-a[1]);
+  h.innerHTML = girisler.length
+    ? girisler.map(([k,n])=>'<div class="raporSatir"><span>'+k+'</span><b>×'+n+'</b></div>').join("")
+    : "Henüz hata yok 🎉";
+}
+function konfeti(){
+  const renkler=["#8E7CC3","#3BA99C","#FFB84D","#F76C5E","#5FA8D3"];
+  const kap=document.createElement("div");
+  kap.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:90;overflow:hidden";
+  for(let i=0;i<32;i++){
+    const p=document.createElement("div");
+    p.className="konfetiParca";
+    p.style.cssText+=";left:"+((i*137)%100)+"%;width:"+(10+(i%3)*4)+"px;height:"+(13+(i%4)*4)+
+      "px;border-radius:"+(i%2?"50%":"3px")+";background:"+renkler[i%5]+";animation-delay:"+((i%8)*0.12)+"s";
+    kap.appendChild(p);
+  }
+  document.body.appendChild(kap);
+  setTimeout(()=>kap.remove(),3200);
+}
+</script>
+</body>
+</html>
